@@ -19,29 +19,58 @@ export default function EditEmployee() {
 
   const navigate = useNavigate();
 
-  const [formData, setFormData] =
-    useState({});
+  const [loading, setLoading] = useState(false);
+
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    department: "",
+    role: "",
+  });
 
   useEffect(() => {
     loadEmployee();
   }, []);
 
   const loadEmployee = async () => {
-    const res =
-      await getEmployee(id);
+    try {
+      const res = await getEmployee(id);
+      const emp = res.data.employee || res.data;
+      if (emp) {
+        setFormData({
+          first_name: emp.first_name || "",
+          last_name: emp.last_name || "",
+          email: emp.email || "",
+          department: emp.department || "",
+          role: emp.role || "",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    setFormData(res.data);
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await updateEmployee(
-      id,
-      formData
-    );
-
-    navigate("/employees");
+    try {
+      setLoading(true);
+      await updateEmployee(id, formData);
+      navigate("/employees");
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to update employee");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,20 +80,47 @@ export default function EditEmployee() {
         className="bg-white p-6 rounded-xl shadow space-y-4"
       >
         <FormInput
-          label="Name"
-          name="name"
-          value={
-            formData.name || ""
-          }
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              name: e.target.value,
-            })
-          }
+          label="First Name *"
+          name="first_name"
+          value={formData.first_name}
+          onChange={handleChange}
+          required
         />
 
-        <FormButton>
+        <FormInput
+          label="Last Name *"
+          name="last_name"
+          value={formData.last_name}
+          onChange={handleChange}
+          required
+        />
+
+        <FormInput
+          label="Email *"
+          name="email"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+
+        <FormInput
+          label="Department *"
+          name="department"
+          value={formData.department}
+          onChange={handleChange}
+          required
+        />
+        
+        <FormInput
+          label="Role *"
+          name="role"
+          value={formData.role}
+          onChange={handleChange}
+          required
+        />
+
+        <FormButton loading={loading}>
           Update Employee
         </FormButton>
       </form>

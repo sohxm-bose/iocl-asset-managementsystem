@@ -7,7 +7,6 @@ import {
 import PageLayout from "../../components/layout/PageLayout";
 
 import FormInput from "../../components/forms/FormInput";
-import FormTextarea from "../../components/forms/FormTextarea";
 import FormButton from "../../components/forms/FormButton";
 
 import {
@@ -20,37 +19,58 @@ export default function EditVendor() {
 
   const navigate = useNavigate();
 
-  const [formData, setFormData] =
-    useState({});
+  const [loading, setLoading] = useState(false);
+
+  const [formData, setFormData] = useState({
+    company_name: "",
+    contact_name: "",
+    contact_email: "",
+    contact_phone: "",
+    support_portal: "",
+  });
 
   useEffect(() => {
     loadVendor();
   }, []);
 
   const loadVendor = async () => {
-    const response =
-      await getVendor(id);
-
-    setFormData(response.data);
+    try {
+      const response = await getVendor(id);
+      const vendor = response.data.vendor || response.data;
+      if (vendor) {
+        setFormData({
+          company_name: vendor.company_name || "",
+          contact_name: vendor.contact_name || "",
+          contact_email: vendor.contact_email || "",
+          contact_phone: vendor.contact_phone || "",
+          support_portal: vendor.support_portal || "",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]:
-        e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await updateVendor(
-      id,
-      formData
-    );
-
-    navigate("/vendors");
+    try {
+      setLoading(true);
+      await updateVendor(id, formData);
+      navigate("/vendors");
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to update vendor");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -60,43 +80,47 @@ export default function EditVendor() {
         className="bg-white p-6 rounded-xl shadow space-y-4"
       >
         <FormInput
-          label="Vendor Name"
-          name="name"
-          value={formData.name || ""}
+          label="Company Name *"
+          name="company_name"
+          value={formData.company_name}
           onChange={handleChange}
+          required
         />
 
         <FormInput
-          label="Contact Person"
-          name="contactPerson"
-          value={
-            formData.contactPerson || ""
-          }
+          label="Contact Name *"
+          name="contact_name"
+          value={formData.contact_name}
           onChange={handleChange}
+          required
         />
 
         <FormInput
-          label="Email"
-          name="email"
-          value={formData.email || ""}
+          label="Contact Email *"
+          name="contact_email"
+          type="email"
+          value={formData.contact_email}
           onChange={handleChange}
+          required
         />
 
         <FormInput
-          label="Phone"
-          name="phone"
-          value={formData.phone || ""}
+          label="Contact Phone *"
+          name="contact_phone"
+          value={formData.contact_phone}
           onChange={handleChange}
+          required
         />
 
-        <FormTextarea
-          label="Address"
-          name="address"
-          value={formData.address || ""}
+        <FormInput
+          label="Support Portal *"
+          name="support_portal"
+          value={formData.support_portal}
           onChange={handleChange}
+          required
         />
 
-        <FormButton>
+        <FormButton loading={loading}>
           Update Vendor
         </FormButton>
       </form>

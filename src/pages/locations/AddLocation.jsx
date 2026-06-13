@@ -10,19 +10,19 @@ import { createLocation } from "../../services/locationService";
 
 export default function AddLocation() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: "",
-    building: "",
+    building_name: "",
     floor: "",
-    city: "",
+    room_number: "",
+    site_manager: "",
   });
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]:
-        e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -30,11 +30,14 @@ export default function AddLocation() {
     e.preventDefault();
 
     try {
+      setLoading(true);
       await createLocation(formData);
-
       navigate("/locations");
     } catch (error) {
       console.error(error);
+      alert(error.response?.data?.message || "Failed to create location");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,34 +48,37 @@ export default function AddLocation() {
         className="bg-white p-6 rounded-xl shadow space-y-4"
       >
         <FormInput
-          label="Location Name"
-          name="name"
-          value={formData.name}
+          label="Building Name *"
+          name="building_name"
+          value={formData.building_name}
           onChange={handleChange}
+          required
         />
 
         <FormInput
-          label="Building"
-          name="building"
-          value={formData.building}
-          onChange={handleChange}
-        />
-
-        <FormInput
-          label="Floor"
+          label="Floor *"
           name="floor"
           value={formData.floor}
           onChange={handleChange}
+          required
         />
 
         <FormInput
-          label="City"
-          name="city"
-          value={formData.city}
+          label="Room Number *"
+          name="room_number"
+          value={formData.room_number}
+          onChange={handleChange}
+          required
+        />
+
+        <FormInput
+          label="Site Manager"
+          name="site_manager"
+          value={formData.site_manager}
           onChange={handleChange}
         />
 
-        <FormButton>
+        <FormButton loading={loading}>
           Create Location
         </FormButton>
       </form>

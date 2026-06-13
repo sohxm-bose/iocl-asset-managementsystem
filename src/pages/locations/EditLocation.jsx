@@ -23,8 +23,14 @@ export default function EditLocation() {
 
   const navigate = useNavigate();
 
-  const [formData, setFormData] =
-    useState({});
+  const [loading, setLoading] = useState(false);
+
+  const [formData, setFormData] = useState({
+    building_name: "",
+    floor: "",
+    room_number: "",
+    site_manager: "",
+  });
 
   useEffect(() => {
     loadLocation();
@@ -32,10 +38,16 @@ export default function EditLocation() {
 
   const loadLocation = async () => {
     try {
-      const response =
-        await getLocation(id);
-
-      setFormData(response.data);
+      const response = await getLocation(id);
+      const loc = response.data.location || response.data;
+      if (loc) {
+        setFormData({
+          building_name: loc.building_name || "",
+          floor: loc.floor || "",
+          room_number: loc.room_number || "",
+          site_manager: loc.site_manager || "",
+        });
+      }
     } catch (error) {
       console.error(error);
     }
@@ -44,8 +56,7 @@ export default function EditLocation() {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]:
-        e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -53,14 +64,14 @@ export default function EditLocation() {
     e.preventDefault();
 
     try {
-      await updateLocation(
-        id,
-        formData
-      );
-
+      setLoading(true);
+      await updateLocation(id, formData);
       navigate("/locations");
     } catch (error) {
       console.error(error);
+      alert(error.response?.data?.message || "Failed to update location");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,36 +82,37 @@ export default function EditLocation() {
         className="bg-white p-6 rounded-xl shadow space-y-4"
       >
         <FormInput
-          label="Location Name"
-          name="name"
-          value={formData.name || ""}
+          label="Building Name *"
+          name="building_name"
+          value={formData.building_name}
           onChange={handleChange}
+          required
         />
 
         <FormInput
-          label="Building"
-          name="building"
-          value={
-            formData.building || ""
-          }
-          onChange={handleChange}
-        />
-
-        <FormInput
-          label="Floor"
+          label="Floor *"
           name="floor"
-          value={formData.floor || ""}
+          value={formData.floor}
           onChange={handleChange}
+          required
         />
 
         <FormInput
-          label="City"
-          name="city"
-          value={formData.city || ""}
+          label="Room Number *"
+          name="room_number"
+          value={formData.room_number}
+          onChange={handleChange}
+          required
+        />
+
+        <FormInput
+          label="Site Manager"
+          name="site_manager"
+          value={formData.site_manager}
           onChange={handleChange}
         />
 
-        <FormButton>
+        <FormButton loading={loading}>
           Update Location
         </FormButton>
       </form>

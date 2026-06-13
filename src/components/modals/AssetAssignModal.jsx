@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Modal from "./Modal";
+import SearchableSelect from "../forms/SearchableSelect";
 
 export default function AssetAssignModal({
   isOpen,
@@ -34,30 +35,19 @@ export default function AssetAssignModal({
         </div>
 
         <div>
-          <label className="block mb-2">
-            Employee
-          </label>
-
-          <select
+          <SearchableSelect
+            label="Employee"
+            name="employee"
             value={employeeId}
             onChange={(e) =>
               setEmployeeId(e.target.value)
             }
-            className="w-full border rounded-lg px-4 py-2"
-          >
-            <option value="">
-              Select Employee
-            </option>
-
-            {employees.map((employee) => (
-              <option
-                key={employee.id}
-                value={employee.id}
-              >
-                {employee.name}
-              </option>
-            ))}
-          </select>
+            options={(Array.isArray(employees) ? employees : []).map((employee) => ({
+              label: employee.name || `${employee.first_name} ${employee.last_name}`,
+              value: employee.id || employee.employee_id,
+            }))}
+            placeholder="Search Employee..."
+          />
         </div>
 
         <button

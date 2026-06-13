@@ -18,9 +18,9 @@ export default function EmployeeList() {
 
   const columns = [
     { key: "name", label: "Name" },
-    { key: "employeeCode", label: "Employee Code" },
-    { key: "department", label: "Department" },
     { key: "email", label: "Email" },
+    { key: "department", label: "Department" },
+    { key: "role", label: "Role" },
   ];
 
   useEffect(() => {
@@ -30,14 +30,19 @@ export default function EmployeeList() {
   const loadEmployees = async () => {
     try {
       const res = await getEmployees();
-      setEmployees(res.data);
+      const emps = res.data?.employees || res.data?.employee || res.data || [];
+      const mapped = (Array.isArray(emps) ? emps : []).map(emp => ({
+        ...emp,
+        name: `${emp.first_name} ${emp.last_name}`
+      }));
+      setEmployees(mapped);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (employee) => {
-    await deleteEmployee(employee.id);
+    await deleteEmployee(employee.employee_id);
     loadEmployees();
   };
 
@@ -61,10 +66,10 @@ export default function EmployeeList() {
           columns={columns}
           data={employees}
           onView={(e) =>
-            navigate(`/employees/${e.id}`)
+            navigate(`/employees/${e.employee_id}`)
           }
           onEdit={(e) =>
-            navigate(`/employees/${e.id}/edit`)
+            navigate(`/employees/${e.employee_id}/edit`)
           }
           onDelete={handleDelete}
         />

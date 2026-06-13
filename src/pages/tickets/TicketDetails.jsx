@@ -8,55 +8,76 @@ import { getTicket } from "../../services/ticketService";
 export default function TicketDetails() {
   const { id } = useParams();
 
-  const [ticket, setTicket] =
-    useState(null);
+  const [ticket, setTicket] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadTicket();
   }, []);
 
   const loadTicket = async () => {
-    const response =
-      await getTicket(id);
-
-    setTicket(response.data);
+    try {
+      const response = await getTicket(id);
+      setTicket(response.data?.ticket || response.data);
+    } catch (error) {
+      console.error(error);
+      setError("Failed to load ticket details.");
+    }
   };
+
+  if (error) {
+    return (
+      <PageLayout title="Ticket Details">
+        <div className="p-4 text-red-500">{error}</div>
+      </PageLayout>
+    );
+  }
 
   if (!ticket) {
     return (
       <PageLayout title="Ticket Details">
-        Loading...
+        <div className="p-4">Loading...</div>
       </PageLayout>
     );
   }
+
+  const formatDate = (d) => {
+    if (!d) return "-";
+    return new Date(d).toLocaleDateString();
+  };
 
   return (
     <PageLayout title="Ticket Details">
       <div className="bg-white rounded-xl shadow p-6">
         <div className="grid md:grid-cols-2 gap-4">
           <InfoCard
-            label="Title"
-            value={ticket.title}
+            label="Ticket Type"
+            value={ticket.ticket_type}
+          />
+          
+          <InfoCard
+            label="Asset"
+            value={ticket.asset ? `${ticket.asset.asset_tag} - ${ticket.asset.model_number || ''}` : "-"}
           />
 
           <InfoCard
-            label="Status"
-            value={ticket.status}
+            label="Issue Description"
+            value={ticket.issue_description}
           />
 
           <InfoCard
-            label="Priority"
-            value={ticket.priority}
+            label="Opened Date"
+            value={formatDate(ticket.opened_date)}
+          />
+          
+          <InfoCard
+            label="Resolved Date"
+            value={formatDate(ticket.resolved_date)}
           />
 
           <InfoCard
-            label="Category"
-            value={ticket.category}
-          />
-
-          <InfoCard
-            label="Description"
-            value={ticket.description}
+            label="Cost"
+            value={ticket.cost ? `$${ticket.cost}` : "-"}
           />
         </div>
       </div>
@@ -64,10 +85,7 @@ export default function TicketDetails() {
   );
 }
 
-function InfoCard({
-  label,
-  value,
-}) {
+function InfoCard({ label, value }) {
   return (
     <div className="border rounded-lg p-4">
       <p className="text-sm text-slate-500">

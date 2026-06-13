@@ -18,20 +18,20 @@ export default function TicketList() {
 
   const columns = [
     {
-      key: "title",
-      label: "Title",
+      key: "ticket_type",
+      label: "Ticket Type",
     },
     {
-      key: "priority",
-      label: "Priority",
+      key: "issue_description",
+      label: "Description",
     },
     {
-      key: "status",
-      label: "Status",
+      key: "opened_date",
+      label: "Opened Date",
     },
     {
-      key: "category",
-      label: "Category",
+      key: "cost",
+      label: "Cost",
     },
   ];
 
@@ -42,7 +42,12 @@ export default function TicketList() {
   const loadTickets = async () => {
     try {
       const response = await getTickets();
-      setTickets(response.data);
+      let tks = response.data?.tickets || response.data?.ticket || response.data || [];
+      tks = (Array.isArray(tks) ? tks : []).map(t => ({
+        ...t,
+        opened_date: t.opened_date ? t.opened_date.split('T')[0] : ''
+      }));
+      setTickets(tks);
     } catch (error) {
       console.error(error);
     } finally {
@@ -52,7 +57,7 @@ export default function TicketList() {
 
   const handleDelete = async (ticket) => {
     try {
-      await deleteTicket(ticket.id);
+      await deleteTicket(ticket.ticket_id);
       loadTickets();
     } catch (error) {
       console.error(error);
@@ -77,10 +82,10 @@ export default function TicketList() {
           columns={columns}
           data={tickets}
           onView={(ticket) =>
-            navigate(`/tickets/${ticket.id}`)
+            navigate(`/tickets/${ticket.ticket_id}`)
           }
           onEdit={(ticket) =>
-            navigate(`/tickets/${ticket.id}/edit`)
+            navigate(`/tickets/${ticket.ticket_id}/edit`)
           }
           onDelete={handleDelete}
         />

@@ -18,19 +18,19 @@ export default function VendorList() {
 
   const columns = [
     {
-      key: "name",
+      key: "company_name",
       label: "Vendor Name",
     },
     {
-      key: "contactPerson",
+      key: "contact_name",
       label: "Contact Person",
     },
     {
-      key: "email",
+      key: "contact_email",
       label: "Email",
     },
     {
-      key: "phone",
+      key: "contact_phone",
       label: "Phone",
     },
   ];
@@ -42,7 +42,8 @@ export default function VendorList() {
   const loadVendors = async () => {
     try {
       const response = await getVendors();
-      setVendors(response.data);
+      const vends = response.data?.vendors || response.data?.vendor || response.data || [];
+      setVendors(Array.isArray(vends) ? vends : []);
     } catch (error) {
       console.error(error);
     } finally {
@@ -52,7 +53,7 @@ export default function VendorList() {
 
   const handleDelete = async (vendor) => {
     try {
-      await deleteVendor(vendor.id);
+      await deleteVendor(vendor.vendor_id);
       loadVendors();
     } catch (error) {
       console.error(error);
@@ -77,10 +78,10 @@ export default function VendorList() {
           columns={columns}
           data={vendors}
           onView={(vendor) =>
-            navigate(`/vendors/${vendor.id}`)
+            navigate(`/vendors/${vendor.vendor_id}`)
           }
           onEdit={(vendor) =>
-            navigate(`/vendors/${vendor.id}/edit`)
+            navigate(`/vendors/${vendor.vendor_id}/edit`)
           }
           onDelete={handleDelete}
         />

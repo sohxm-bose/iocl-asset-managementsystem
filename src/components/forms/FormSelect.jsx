@@ -30,7 +30,7 @@ export default function FormSelect({
           Select {label}
         </option>
 
-        {options.map((option) => (
+        {(Array.isArray(options) ? options : []).map((option) => (
           <option
             key={option.value}
             value={option.value}

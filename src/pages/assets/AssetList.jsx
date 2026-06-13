@@ -28,7 +28,7 @@ export default function AssetList() {
 
   const columns = [
     {
-      key: "assetTag",
+      key: "asset_tag",
       label: "Asset Tag",
     },
     {
@@ -36,7 +36,11 @@ export default function AssetList() {
       label: "Manufacturer",
     },
     {
-      key: "model",
+      key: "po_no",
+      label: "PO Number",
+    },
+    {
+      key: "model_number",
       label: "Model",
     },
     {
@@ -52,10 +56,9 @@ export default function AssetList() {
   const loadAssets = async () => {
     try {
       setLoading(true);
-
       const response = await getAssets();
-
-      setAssets(response.data);
+      const asts = response.data?.assets || response.data?.data || response.data || [];
+      setAssets(Array.isArray(asts) ? asts : []);
     } catch (error) {
       console.error(error);
     } finally {
@@ -64,11 +67,11 @@ export default function AssetList() {
   };
 
   const handleView = (asset) => {
-    navigate(`/assets/${asset.id}`);
+    navigate(`/assets/${asset.asset_id}`);
   };
 
   const handleEdit = (asset) => {
-    navigate(`/assets/${asset.id}/edit`);
+    navigate(`/assets/${asset.asset_id}/edit`);
   };
 
   const handleDeleteClick = (asset) => {
@@ -78,7 +81,7 @@ export default function AssetList() {
 
   const handleDeleteConfirm = async () => {
     try {
-      await deleteAsset(selectedAsset.id);
+      await deleteAsset(selectedAsset.asset_id);
 
       loadAssets();
 
@@ -90,7 +93,7 @@ export default function AssetList() {
 
   const filteredAssets = assets.filter(
     (asset) =>
-      asset.assetTag
+      asset.asset_tag
         ?.toLowerCase()
         .includes(search.toLowerCase()) ||
       asset.manufacturer
@@ -156,7 +159,7 @@ export default function AssetList() {
           setDeleteModalOpen(false)
         }
         itemName={
-          selectedAsset?.assetTag
+          selectedAsset?.asset_tag
         }
         onConfirm={handleDeleteConfirm}
       />

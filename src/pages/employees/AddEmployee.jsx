@@ -10,29 +10,35 @@ import { createEmployee } from "../../services/employeeService";
 
 export default function AddEmployee() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] =
-    useState({
-      name: "",
-      employeeCode: "",
-      email: "",
-      department: "",
-    });
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    department: "",
+    role: "",
+  });
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]:
-        e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    await createEmployee(formData);
-
-    navigate("/employees");
+    try {
+      setLoading(true);
+      await createEmployee(formData);
+      navigate("/employees");
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to create employee");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,34 +48,47 @@ export default function AddEmployee() {
         className="bg-white p-6 rounded-xl shadow space-y-4"
       >
         <FormInput
-          label="Name"
-          name="name"
-          value={formData.name}
+          label="First Name *"
+          name="first_name"
+          value={formData.first_name}
           onChange={handleChange}
+          required
         />
 
         <FormInput
-          label="Employee Code"
-          name="employeeCode"
-          value={formData.employeeCode}
+          label="Last Name *"
+          name="last_name"
+          value={formData.last_name}
           onChange={handleChange}
+          required
         />
 
         <FormInput
-          label="Email"
+          label="Email *"
           name="email"
+          type="email"
           value={formData.email}
           onChange={handleChange}
+          required
         />
 
         <FormInput
-          label="Department"
+          label="Department *"
           name="department"
           value={formData.department}
           onChange={handleChange}
+          required
+        />
+        
+        <FormInput
+          label="Role *"
+          name="role"
+          value={formData.role}
+          onChange={handleChange}
+          required
         />
 
-        <FormButton>
+        <FormButton loading={loading}>
           Create Employee
         </FormButton>
       </form>

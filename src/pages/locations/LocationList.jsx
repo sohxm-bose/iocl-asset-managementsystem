@@ -18,11 +18,7 @@ export default function LocationList() {
 
   const columns = [
     {
-      key: "name",
-      label: "Location Name",
-    },
-    {
-      key: "building",
+      key: "building_name",
       label: "Building",
     },
     {
@@ -30,8 +26,12 @@ export default function LocationList() {
       label: "Floor",
     },
     {
-      key: "city",
-      label: "City",
+      key: "room_number",
+      label: "Room Number",
+    },
+    {
+      key: "site_manager",
+      label: "Site Manager",
     },
   ];
 
@@ -42,7 +42,8 @@ export default function LocationList() {
   const loadLocations = async () => {
     try {
       const response = await getLocations();
-      setLocations(response.data);
+      const locs = response.data?.locations || response.data?.location || response.data || [];
+      setLocations(Array.isArray(locs) ? locs : []);
     } catch (error) {
       console.error(error);
     } finally {
@@ -52,7 +53,7 @@ export default function LocationList() {
 
   const handleDelete = async (location) => {
     try {
-      await deleteLocation(location.id);
+      await deleteLocation(location.location_id);
       loadLocations();
     } catch (error) {
       console.error(error);
@@ -80,12 +81,12 @@ export default function LocationList() {
           data={locations}
           onView={(location) =>
             navigate(
-              `/locations/${location.id}`
+              `/locations/${location.location_id}`
             )
           }
           onEdit={(location) =>
             navigate(
-              `/locations/${location.id}/edit`
+              `/locations/${location.location_id}/edit`
             )
           }
           onDelete={handleDelete}

@@ -9,6 +9,7 @@ export default function AssetDetails() {
   const { id } = useParams();
 
   const [asset, setAsset] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadAsset();
@@ -17,20 +18,33 @@ export default function AssetDetails() {
   const loadAsset = async () => {
     try {
       const response = await getAsset(id);
-
-      setAsset(response.data);
+      setAsset(response.data?.asset || response.data?.data || response.data);
     } catch (error) {
       console.error(error);
+      setError("Failed to load asset details.");
     }
   };
+
+  if (error) {
+    return (
+      <PageLayout title="Asset Details">
+        <div className="p-4 text-red-500">{error}</div>
+      </PageLayout>
+    );
+  }
 
   if (!asset) {
     return (
       <PageLayout title="Asset Details">
-        Loading...
+        <div className="p-4">Loading...</div>
       </PageLayout>
     );
   }
+
+  const formatDate = (d) => {
+    if (!d) return "-";
+    return new Date(d).toLocaleDateString();
+  };
 
   return (
     <PageLayout title="Asset Details">
@@ -38,7 +52,7 @@ export default function AssetDetails() {
         <div className="grid md:grid-cols-2 gap-6">
           <InfoCard
             label="Asset Tag"
-            value={asset.assetTag}
+            value={asset.asset_tag}
           />
 
           <InfoCard
@@ -47,28 +61,53 @@ export default function AssetDetails() {
           />
 
           <InfoCard
-            label="Model"
-            value={asset.model}
+            label="Model Number"
+            value={asset.model_number}
+          />
+          
+          <InfoCard
+            label="Serial Number"
+            value={asset.serial_number}
           />
 
           <InfoCard
             label="Category"
             value={asset.category}
           />
+          
+          <InfoCard
+            label="Sub Category"
+            value={asset.sub_category}
+          />
 
           <InfoCard
             label="Status"
             value={asset.status}
           />
+          
+          <InfoCard
+            label="Purchase Cost"
+            value={asset.purchase_cost ? `$${asset.purchase_cost}` : "-"}
+          />
 
           <InfoCard
             label="Purchase Date"
-            value={asset.purchaseDate}
+            value={formatDate(asset.purchase_date)}
           />
 
           <InfoCard
             label="Warranty Expiry"
-            value={asset.warrantyExpiry}
+            value={formatDate(asset.warranty_expiry)}
+          />
+
+          <InfoCard
+            label="Assigned To"
+            value={asset.employee ? `${asset.employee.first_name} ${asset.employee.last_name}` : "-"}
+          />
+
+          <InfoCard
+            label="Location"
+            value={asset.location ? `${asset.location.building_name} - ${asset.location.room_number}` : "-"}
           />
         </div>
       </div>

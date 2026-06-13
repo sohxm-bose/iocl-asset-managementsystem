@@ -8,24 +8,35 @@ import { getVendor } from "../../services/vendorService";
 export default function VendorDetails() {
   const { id } = useParams();
 
-  const [vendor, setVendor] =
-    useState(null);
+  const [vendor, setVendor] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadVendor();
   }, []);
 
   const loadVendor = async () => {
-    const response =
-      await getVendor(id);
-
-    setVendor(response.data);
+    try {
+      const response = await getVendor(id);
+      setVendor(response.data?.vendor || response.data);
+    } catch (error) {
+      console.error(error);
+      setError("Failed to load vendor details.");
+    }
   };
+
+  if (error) {
+    return (
+      <PageLayout title="Vendor Details">
+        <div className="p-4 text-red-500">{error}</div>
+      </PageLayout>
+    );
+  }
 
   if (!vendor) {
     return (
       <PageLayout title="Vendor Details">
-        Loading...
+        <div className="p-4">Loading...</div>
       </PageLayout>
     );
   }
@@ -35,28 +46,28 @@ export default function VendorDetails() {
       <div className="bg-white rounded-xl shadow p-6">
         <div className="grid md:grid-cols-2 gap-4">
           <InfoCard
-            label="Vendor Name"
-            value={vendor.name}
+            label="Company Name"
+            value={vendor.company_name}
           />
 
           <InfoCard
-            label="Contact Person"
-            value={vendor.contactPerson}
+            label="Contact Name"
+            value={vendor.contact_name}
           />
 
           <InfoCard
-            label="Email"
-            value={vendor.email}
+            label="Contact Email"
+            value={vendor.contact_email}
           />
 
           <InfoCard
-            label="Phone"
-            value={vendor.phone}
+            label="Contact Phone"
+            value={vendor.contact_phone}
           />
 
           <InfoCard
-            label="Address"
-            value={vendor.address}
+            label="Support Portal"
+            value={vendor.support_portal}
           />
         </div>
       </div>

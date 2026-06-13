@@ -12,8 +12,8 @@ import { getLocation } from "../../services/locationService";
 export default function LocationDetails() {
   const { id } = useParams();
 
-  const [location, setLocation] =
-    useState(null);
+  const [location, setLocation] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadLocation();
@@ -21,19 +21,26 @@ export default function LocationDetails() {
 
   const loadLocation = async () => {
     try {
-      const response =
-        await getLocation(id);
-
-      setLocation(response.data);
+      const response = await getLocation(id);
+      setLocation(response.data?.location || response.data);
     } catch (error) {
       console.error(error);
+      setError("Failed to load location details.");
     }
   };
+
+  if (error) {
+    return (
+      <PageLayout title="Location Details">
+        <div className="p-4 text-red-500">{error}</div>
+      </PageLayout>
+    );
+  }
 
   if (!location) {
     return (
       <PageLayout title="Location Details">
-        Loading...
+        <div className="p-4">Loading...</div>
       </PageLayout>
     );
   }
@@ -43,13 +50,8 @@ export default function LocationDetails() {
       <div className="bg-white rounded-xl shadow p-6">
         <div className="grid md:grid-cols-2 gap-4">
           <InfoCard
-            label="Location Name"
-            value={location.name}
-          />
-
-          <InfoCard
-            label="Building"
-            value={location.building}
+            label="Building Name"
+            value={location.building_name}
           />
 
           <InfoCard
@@ -58,8 +60,13 @@ export default function LocationDetails() {
           />
 
           <InfoCard
-            label="City"
-            value={location.city}
+            label="Room Number"
+            value={location.room_number}
+          />
+
+          <InfoCard
+            label="Site Manager"
+            value={location.site_manager}
           />
         </div>
       </div>
@@ -67,10 +74,7 @@ export default function LocationDetails() {
   );
 }
 
-function InfoCard({
-  label,
-  value,
-}) {
+function InfoCard({ label, value }) {
   return (
     <div className="border rounded-lg p-4">
       <p className="text-sm text-slate-500">
